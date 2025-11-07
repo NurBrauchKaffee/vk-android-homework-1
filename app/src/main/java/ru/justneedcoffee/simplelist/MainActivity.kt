@@ -1,11 +1,13 @@
 package ru.justneedcoffee.simplelist
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -17,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -31,9 +34,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SimpleListTheme {
+                val context = LocalContext.current
+
                 MainScreen(
                     items = viewModel.items,
-                    onAddItem = { viewModel.addItem() }
+                    onAddItem = { viewModel.addItem() },
+                    onItemClick = { number ->
+                        val intent = Intent(context, DetailActivity::class.java).apply {
+                            putExtra(DetailActivity.EXTRA_NUMBER, number)
+                        }
+                        context.startActivity(intent)
+                    }
                 )
             }
         }
@@ -41,7 +52,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(items: List<Int>, onAddItem: () -> Unit) {
+fun MainScreen(
+    items: List<Int>,
+    onAddItem: () -> Unit,
+    onItemClick: (Int) -> Unit
+) {
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = onAddItem) {
@@ -78,14 +93,17 @@ fun MainScreen(items: List<Int>, onAddItem: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.grid_spacing))
         ) {
             items(items) { number ->
-                GridItem(number = number)
+                GridItem(
+                    number = number,
+                    onClick = { onItemClick(number) }
+                )
             }
         }
     }
 }
 
 @Composable
-fun GridItem(number: Int) {
+fun GridItem(number: Int, onClick: () -> Unit) {
     val backgroundColor = if (number % 2 == 0) {
         colorResource(id = R.color.even_color)
     } else {
@@ -96,7 +114,8 @@ fun GridItem(number: Int) {
         modifier = Modifier
             // добавляем соотношение сторон 1:1
             .aspectRatio(1f)
-            .background(backgroundColor),
+            .background(backgroundColor)
+            .clickable (onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(

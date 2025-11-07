@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">SimpleList</string>
     <string name="add_item_desc">Добавить новый элемент</string>
+
+    <string name="detail_screen_title">Элемент</string>
+    <string name="navigate_back_desc">Вернуться назад</string>
 </resources>
